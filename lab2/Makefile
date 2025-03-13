@@ -1,17 +1,20 @@
 CC=gcc
 CFLAGS=-c -Wall -g
 
-all: countdown
+static: countdown
 .PHONY: all
 
-countdown: countdown.o
+static: countdown.o
 	$(CC) countdown.o -o countdown
 
-countdown.o: countdown.c
-	$(CC) $(CFLAGS) countdown.c
+collatz.o: collatz.c
+	$(CC) $(CFLAGS) collatz.c
+
+client.o: client.c
+	$(CC) $(CFLAGS) client.c
 
 clean:
-	$(RM) *o countdown
+	$(RM) *o client collatz
 .PHONY: clean
 
 client: 
