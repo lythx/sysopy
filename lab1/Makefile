@@ -2,6 +2,7 @@ CC=gcc
 CFLAGS=-c -Wall -g
 
 all: countdown
+.PHONY: all
 
 countdown: countdown.o
 	$(CC) countdown.o -o countdown
@@ -9,6 +10,8 @@ countdown: countdown.o
 countdown.o: countdown.c
 	$(CC) $(CFLAGS) countdown.c
 
-clean: 
+clean:
 	$(RM) *o countdown
 .PHONY: clean
+
+client: 
