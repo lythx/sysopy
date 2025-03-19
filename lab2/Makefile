@@ -1,20 +1,28 @@
 CC=gcc
-CFLAGS=-c -Wall -g
+CFLAGS=-c -Wall
 
-static: countdown
+all: static shared dynamic
 .PHONY: all
 
-static: countdown.o
-	$(CC) countdown.o -o countdown
+static: libcollatz.a
+	$(CC) client.c libcollatz.a -o prog_static
 
-collatz.o: collatz.c
+shared: libcollatz.so.1
+	ln -s libcollatz.so.1 libcollatz.so
+	$(CC) client.c -lcollatz -L ./ -Wl,-rpath,. -o prog_shared 
+
+dynamic: libcollatz.so.1
+	$(CC) $(CFLAGS) -DDYNAMIC client.c
+	$(CC) client.o -o prog_dynamic
+
+libcollatz.a:
 	$(CC) $(CFLAGS) collatz.c
+	ar rcs libcollatz.a collatz.o
 
-client.o: client.c
-	$(CC) $(CFLAGS) client.c
+libcollatz.so.1:
+	$(CC) $(CFLAGS) -fPIC -c collatz.c;
+	$(CC) -shared -Wl,-soname,libcollatz.so.1 -o libcollatz.so.1 collatz.o -lc
 
 clean:
-	$(RM) *o client collatz
+	$(RM) *o lib* prog*
 .PHONY: clean
-
-client: 
