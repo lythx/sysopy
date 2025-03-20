@@ -15,11 +15,11 @@ dynamic: libcollatz.so.1
 	$(CC) $(CFLAGS) -DDYNAMIC client.c
 	$(CC) client.o -o prog_dynamic
 
-libcollatz.a:
+libcollatz.a: collatz.c
 	$(CC) $(CFLAGS) collatz.c
 	ar rcs libcollatz.a collatz.o
 
-libcollatz.so.1:
+libcollatz.so.1: collatz.c
 	$(CC) $(CFLAGS) -fPIC -c collatz.c;
 	$(CC) -shared -Wl,-soname,libcollatz.so.1 -o libcollatz.so.1 collatz.o -lc
 
