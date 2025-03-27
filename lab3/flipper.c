@@ -37,7 +37,7 @@ int main() {
   while ((df = readdir(in_dir))) {
     dot = strrchr(df->d_name, '.');
     if (!dot || strcmp(dot, ".txt")) {
-        continue;
+      continue;
     }
 
     strcpy(in_path, in_dirname);
