@@ -9,7 +9,7 @@
 
 void handler()
 {
-    printf("Otrzymano sygnał SIGUSR1");
+    printf("Otrzymano sygnal SIGUSR1 w handlerze\n");
 }
 
 int main(int argc, char *argv[])
@@ -36,7 +36,18 @@ int main(int argc, char *argv[])
         sigemptyset(&mask);
         sigaddset(&mask, SIGUSR1);
         pthread_sigmask(SIG_BLOCK, &mask, NULL);
+    }
+    else if (strcmp(action, "none") != 0)
+    {
+        printf("Podaj argument ignore/handler/mask/none\n");
+        return 1;
+    }
 
+    raise(SIGUSR1);
+    printf("Wyslano SIGUSR1.\n");
+
+    if (strcmp(action, "mask") == 0)
+    {
         sigset_t pending;
         sigpending(&pending);
         if (sigismember(&pending, SIGUSR1))
@@ -48,13 +59,5 @@ int main(int argc, char *argv[])
             printf("SIGUSR1 nie jest widoczny.\n");
         }
     }
-    else if (strcmp(action, "none") != 0)
-    {
-        printf("Podaj argument ignore/handler/mask/none\n");
-        return 1;
-    }
-
-    raise(SIGUSR1);
-    printf("Sygnał SIGUSR1 został wysłany.\n");
     return 0;
 }
