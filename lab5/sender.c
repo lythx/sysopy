@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
   sigemptyset(&mask);
   sigaddset(&mask, SIGUSR1);
 
-  sigsuspend(&mask);
+  pause();
 
   printf("Sender otrzymał potwierdzenie\n");
 

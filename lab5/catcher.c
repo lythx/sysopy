@@ -39,12 +39,14 @@ int main()
   sigemptyset(&mask);
   sigaddset(&mask, SIGUSR1);
 
+  pause();
   while (1)
   {
-    printf("Catcher przyjal SIGUSER1 z trybem %d\n", mode);
+    printf("Catcher przyjal SIGUSR1 z trybem %d\n", mode);
     if (mode == 1)
     {
       printf("Liczba żądań zmiany pracy: %d\n", received_signals);
+      pause();
     }
     else if (mode == 2)
     {
@@ -57,17 +59,16 @@ int main()
     else if (mode == 3)
     {
       signal(SIGINT, SIG_IGN);
+      pause();
     }
     else if (mode == 4)
     {
       signal(SIGINT, sigint_handler);
+      pause();
     }
     else if (mode == 5)
     {
-      exit(0);
+      return 0;
     }
-    pause();
   }
-
-  return 0;
 }
