@@ -39,7 +39,6 @@ int main()
   sigemptyset(&mask);
   sigaddset(&mask, SIGUSR1);
 
-  sigsuspend(&mask);
   while (1)
   {
     printf("Catcher przyjal SIGUSER1 z trybem %d\n", mode);
@@ -67,7 +66,7 @@ int main()
     {
       exit(0);
     }
-    sigsuspend(&mask);
+    pause();
   }
 
   return 0;
