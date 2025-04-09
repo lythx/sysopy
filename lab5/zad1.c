@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     {
         signal(SIGUSR1, handler);
     }
-    else if (strcmp(disposition_str, "mask") == 0)
+    else if (strcmp(action, "mask") == 0)
     {
         sigset_t mask;
         sigemptyset(&mask);
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
             printf("SIGUSR1 nie jest widoczny.\n");
         }
     }
-    else if (strcmp(disposition_str, "none") != 0)
+    else if (strcmp(action, "none") != 0)
     {
         printf("Podaj argument ignore/handler/mask/none\n");
         return 1;
