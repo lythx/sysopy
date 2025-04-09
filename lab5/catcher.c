@@ -58,5 +58,7 @@ int main()
   sa.sa_sigaction = sigusr1_handler;
   sigaction(SIGUSR1, &sa, NULL);
 
+  while (true) {}
+
   return 0;
 }
