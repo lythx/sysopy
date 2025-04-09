@@ -23,10 +23,10 @@ int main(int argc, char *argv[])
   sigqueue(catcher_pid, SIGUSR1, sv);
 
   sigset_t mask;
-  sigemptyset(&mask);
-  sigaddset(&mask, SIGUSR1);
+  sigfullset(&mask);
+  sigdelset(&mask, SIGUSR1);
 
-  pause();
+  sigsuspend(&suspend_mask);
 
   printf("Sender otrzymał potwierdzenie\n");
 

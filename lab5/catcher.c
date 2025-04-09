@@ -35,18 +35,18 @@ int main()
   sigemptyset(&sa.sa_mask);
   sigaction(SIGUSR1, &sa, NULL);
 
-  sigset_t mask;
-  sigemptyset(&mask);
-  sigaddset(&mask, SIGUSR1);
+  sigset_t suspend_mask;
+  sigfillset(&mask);
+  sigdelset(&mask, SIGUSR1);
 
-  pause();
+  sigsuspend(&suspend_mask);
   while (1)
   {
     printf("Catcher przyjal SIGUSR1 z trybem %d\n", mode);
     if (mode == 1)
     {
       printf("Liczba żądań zmiany pracy: %d\n", received_signals);
-      pause();
+      sigsuspend(&suspend_mask);
     }
     else if (mode == 2)
     {
@@ -59,12 +59,12 @@ int main()
     else if (mode == 3)
     {
       signal(SIGINT, SIG_IGN);
-      pause();
+      sigsuspend(&suspend_mask);
     }
     else if (mode == 4)
     {
       signal(SIGINT, sigint_handler);
-      pause();
+      sigsuspend(&suspend_mask);
     }
     else if (mode == 5)
     {
