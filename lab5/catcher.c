@@ -50,7 +50,7 @@ int main()
     }
     else if (mode == 2)
     {
-      for (int i = 1; mode == 2; ++i)
+      for (int i = 1; mode == 2; i++)
       {
         printf("%d\n", i);
         sleep(1);
