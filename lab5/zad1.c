@@ -21,13 +21,10 @@ int main(int argc, char *argv[])
     }
 
     const char *action = argv[1];
-    pid_t pid = getpid();
-    printf("PID procesu: %d\n", pid);
-    printf("Ustawiona dyspozycja: %s\n", disposition_str);
 
     if (strcmp(action, "ignore") == 0)
     {
-        signal(SIGUSR1, SIG_IGN)
+        signal(SIGUSR1, SIG_IGN);
     }
     else if (strcmp(action, "handler") == 0)
     {
