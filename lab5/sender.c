@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
   if (argc != 3)
   {
-    printf("Podaj PID catchera i tryb pracy\n", argv[0]);
+    printf("Podaj PID catchera i tryb pracy\n");
     return 1;
   }
 

@@ -13,11 +13,11 @@ void sigint_handler(int sig)
   printf("Wciśnięto CTRL+C\n");
 }
 
-void sigusr1_handler(int sig, siginfo_t *info)
+void sigusr1_handler(int sig, siginfo_t *info, void* _)
 {
   received_signals++;
   int mode = info->si_value.sival_int;
-  printf("Catcher przyjal SIGUSER1 z trybem %s\n", mode);
+  printf("Catcher przyjal SIGUSER1 z trybem %d\n", mode);
   kill(sender_pid, SIGUSR1);
   if (mode == 1)
   {
