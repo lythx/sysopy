@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-c -Wall -g
 
-all: zad1 zad2
+all: zad1 catcher sender
 .PHONY: all
 
 zad1: zad1.o
@@ -10,12 +10,18 @@ zad1: zad1.o
 zad1.o: zad1.c
 	$(CC) $(CFLAGS) zad1.c
 
-zad2: zad2.o
-	$(CC) zad2.o -o zad2
+catcher: catcher.o
+	$(CC) catcher.o -o catcher
 
-zad2.o: zad2.c
-	$(CC) $(CFLAGS) zad2.c
+catcher.o: catcher.c
+	$(CC) $(CFLAGS) catcher.c
+
+sender: sender.o
+	$(CC) sender.o -o sender
+
+sender.o: sender.c
+	$(CC) $(CFLAGS) sender.c
 
 clean:
-	$(RM) *o zad1 zad2 
+	$(RM) *o zad1 catcher 
 .PHONY: clean
