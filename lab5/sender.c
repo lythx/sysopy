@@ -22,9 +22,9 @@ int main(int argc, char *argv[])
   sv.sival_int = mode;
   sigqueue(catcher_pid, SIGUSR1, sv);
 
-  sigset_t mask;
-  sigfullset(&mask);
-  sigdelset(&mask, SIGUSR1);
+  sigset_t suspend_mask;
+  sigfillset(&suspend_mask);
+  sigdelset(&suspend_mask, SIGUSR1);
 
   sigsuspend(&suspend_mask);
 

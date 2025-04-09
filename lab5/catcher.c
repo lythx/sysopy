@@ -36,8 +36,8 @@ int main()
   sigaction(SIGUSR1, &sa, NULL);
 
   sigset_t suspend_mask;
-  sigfillset(&mask);
-  sigdelset(&mask, SIGUSR1);
+  sigfillset(&suspend_mask);
+  sigdelset(&suspend_mask, SIGUSR1);
 
   sigsuspend(&suspend_mask);
   while (1)
