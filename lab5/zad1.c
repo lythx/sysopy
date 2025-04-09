@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    printf("Wyslano SIGUSR1\n");
     raise(SIGUSR1);
-    printf("Wyslano SIGUSR1.\n");
 
     if (strcmp(action, "mask") == 0)
     {
@@ -52,11 +52,11 @@ int main(int argc, char *argv[])
         sigpending(&pending);
         if (sigismember(&pending, SIGUSR1))
         {
-            printf("SIGUSR1 jest widoczny.\n");
+            printf("SIGUSR1 jest widoczny\n");
         }
         else
         {
-            printf("SIGUSR1 nie jest widoczny.\n");
+            printf("SIGUSR1 nie jest widoczny\n");
         }
     }
     return 0;
