@@ -42,12 +42,13 @@ int main()
   sigdelset(&suspend_mask, SIGUSR1);
   sigdelset(&suspend_mask, SIGINT);
   sigsuspend(&suspend_mask);
-  
+
   while (1)
   {
     if (prev_mode == mode) {
       continue;
     }
+    prev_mode = mode;
     printf("Catcher przyjal SIGUSR1 z trybem %d\n", mode);
     if (mode == 1)
     {
