@@ -6,7 +6,7 @@
 #include <string.h>
 
 int received_signals = 0;
-int mode = 0;
+volatile int mode = 0;
 
 void sigint_handler(int sig)
 {
