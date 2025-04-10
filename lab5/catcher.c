@@ -48,7 +48,11 @@ int main()
     if (mode == 1)
     {
       printf("Liczba żądań zmiany pracy: %d\n", received_signals);
-      pause();
+      while (1) {
+        if (prev_mode != mode) {
+          break;
+        }
+      }
     }
     else if (mode == 2)
     {
@@ -61,12 +65,20 @@ int main()
     else if (mode == 3)
     {
       signal(SIGINT, SIG_IGN);
-      pause();
+      while (1) {
+        if (prev_mode != mode) {
+          break;
+        }
+      }
     }
     else if (mode == 4)
     {
       signal(SIGINT, sigint_handler);
-      pause();
+      while (1) {
+        if (prev_mode != mode) {
+          break;
+        }
+      }
     }
     else if (mode == 5)
     {
