@@ -41,9 +41,9 @@ int main()
   while (1)
   {
     if (prev_mode != mode) {
-      
       continue;
     }
+    prev_mode = mode;
     printf("Catcher przyjal SIGUSR1 z trybem %d\n", mode);
     if (mode == 1)
     {
