@@ -6,7 +6,7 @@
 #include <string.h>
 
 int received_signals = 0;
-int mode = 1;
+int mode = 0;
 
 void sigint_handler(int sig)
 {
@@ -35,18 +35,20 @@ int main()
   sigemptyset(&sa.sa_mask);
   sigaction(SIGUSR1, &sa, NULL);
 
-  sigset_t suspend_mask;
-  sigfillset(&suspend_mask);
-  sigdelset(&suspend_mask, SIGUSR1);
+  int prev_mode = mode;
 
-  sigsuspend(&suspend_mask);
+  pause();
   while (1)
   {
+    if (prev_mode != mode) {
+      
+      continue;
+    }
     printf("Catcher przyjal SIGUSR1 z trybem %d\n", mode);
     if (mode == 1)
     {
       printf("Liczba żądań zmiany pracy: %d\n", received_signals);
-      sigsuspend(&suspend_mask);
+      pause();
     }
     else if (mode == 2)
     {
@@ -59,12 +61,12 @@ int main()
     else if (mode == 3)
     {
       signal(SIGINT, SIG_IGN);
-      sigsuspend(&suspend_mask);
+      pause();
     }
     else if (mode == 4)
     {
       signal(SIGINT, sigint_handler);
-      sigsuspend(&suspend_mask);
+      pause();
     }
     else if (mode == 5)
     {
