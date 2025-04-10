@@ -6,7 +6,7 @@
 #include <string.h>
 
 int received_signals = 0;
-volatile int mode = 0;
+int mode = 0;
 
 void sigint_handler(int sig)
 {
@@ -37,22 +37,22 @@ int main()
 
   int prev_mode = mode;
 
-  pause();
+  sigset_t suspend_mask;
+  sigfillset(&suspend_mask);
+  sigdelset(&suspend_mask, SIGUSR1);
+  sigdelset(&suspend_mask, SIGINT);
+  sigsuspend(&suspend_mask);
+  
   while (1)
   {
-    if (prev_mode != mode) {
+    if (prev_mode == mode) {
       continue;
     }
-    prev_mode = mode;
     printf("Catcher przyjal SIGUSR1 z trybem %d\n", mode);
     if (mode == 1)
     {
       printf("Liczba żądań zmiany pracy: %d\n", received_signals);
-      while (1) {
-        if (prev_mode != mode) {
-          break;
-        }
-      }
+      sigsuspend(&suspend_mask);
     }
     else if (mode == 2)
     {
@@ -65,20 +65,12 @@ int main()
     else if (mode == 3)
     {
       signal(SIGINT, SIG_IGN);
-      while (1) {
-        if (prev_mode != mode) {
-          break;
-        }
-      }
+      sigsuspend(&suspend_mask);
     }
     else if (mode == 4)
     {
       signal(SIGINT, sigint_handler);
-      while (1) {
-        if (prev_mode != mode) {
-          break;
-        }
-      }
+      sigsuspend(&suspend_mask);
     }
     else if (mode == 5)
     {
