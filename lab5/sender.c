@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
   sigset_t suspend_mask;
   sigfillset(&suspend_mask);
   sigdelset(&suspend_mask, SIGUSR1);
-
+  sigdelset(&suspend_mask, SIGINT);
   sigsuspend(&suspend_mask);
 
   printf("Sender otrzymał potwierdzenie\n");
