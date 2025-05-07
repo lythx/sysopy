@@ -24,8 +24,6 @@ int main(int argc, char *argv[])
   double a = atof(argv[1]);
   double b = atof(argv[2]);
 
-  // printf("niggers %f %f", a, b);
-
   mkfifo(FIFO_NAME, S_IRWXU);
 
   int fifo;
