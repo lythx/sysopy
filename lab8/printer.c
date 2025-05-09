@@ -1,22 +1,16 @@
 #include "common.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    char shared_buf[SHARED_MEM_SIZE];
+    setbuf(stdout, NULL);
 
-    key_t printer_sem_key = ftok(PRINTER_SEM_PATH, PRINTER_SEM_ID);
-    int printer_sem_id = semget(printer_sem_key, 1, 0666);
-    if (printer_sem_id == -1)
-    {
-        printf("Error when accessing printer semaphore: %d", errno);
-        return errno;
-    }
+    int printer_id = argc < 2 ? getpid() : atoi(argv[1]);
 
-    key_t request_sem_key = ftok(REQUEST_SEM_PATH, REQUEST_SEM_ID);
-    int request_sem_id = semget(request_sem_key, 1, 0666);
-    if (request_sem_id == -1)
+    key_t sem_key = ftok(SEM_PATH, SEM_ID);
+    int sem_id = semget(sem_key, 0, 0666);
+    if (sem_id == -1)
     {
-        printf("Error when accessing request semaphore: %d", errno);
+        printf("Error when accessing semaphores: %d\n", errno);
         return errno;
     }
 
@@ -24,25 +18,44 @@ int main()
     int shared_mem_id = shmget(shared_mem_key, SHARED_MEM_SIZE, 0666);
     if (shared_mem_id == -1)
     {
-        printf("Error when accessing shared memory: %d", errno);
+        printf("Error when accessing shared memory: %d\n", errno);
         return errno;
     }
-    *shared_buf = shmat(shared_mem_id, NULL, 0);
+    char *shared_buf;
+    shared_buf = shmat(shared_mem_id, NULL, 0);
 
-    struct sembuf op = {0};
+    char text_to_print[PRINT_TEXT_SIZE];
+
+    struct sembuf op_queue_inc = {0};
+    op_queue_inc.sem_num = SEM_QUEUE_SPOTS;
+    op_queue_inc.sem_flg = 0;
+    op_queue_inc.sem_op = 1;
+
+    struct sembuf op_printer_inc = {0};
+    op_printer_inc.sem_num = SEM_AVAILABLE_PRINTERS;
+    op_printer_inc.sem_flg = 0;
+    op_printer_inc.sem_op = 1;
+
+    struct sembuf op_request_dec = {0};
+    op_request_dec.sem_num = SEM_PENDING_REQUESTS;
+    op_request_dec.sem_flg = 0;
+    op_request_dec.sem_op = -1;
 
     while (1)
     {
-        op.sem_num = 1;
-        op.sem_op = 1;
-        op.sem_flg = 0;
-        semop(printer_sem_id, &op, 1);
+        semop(sem_id, &op_printer_inc, 1);
+        semop(sem_id, &op_request_dec, 1);
+        semop(sem_id, &op_queue_inc, 1);
 
-        op.sem_num = 1;
-        op.sem_op = -1;
-        op.sem_flg = 0;
-        semop(request_sem_id, &op, 1);
+        strncpy(text_to_print, shared_buf, PRINT_TEXT_SIZE);
+        text_to_print[PRINT_TEXT_SIZE] = '\0';
 
-        sleep(1);
+        memmove(shared_buf, shared_buf + PRINT_TEXT_SIZE, strlen(shared_buf) - PRINT_TEXT_SIZE + 1);
+
+        for (int i = 0; i < PRINT_TEXT_SIZE; i++)
+        {
+            printf("[Printer %d] %c\n", printer_id, text_to_print[i]);
+            sleep(1);
+        }
     }
 }

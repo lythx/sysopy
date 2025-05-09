@@ -1,52 +1,56 @@
 #include "common.h"
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc < 3)
+    {
+        printf("Podaj liczbę drukarek i klientów");
+    }
+
     setbuf(stdout, NULL);
 
-    int printer_count = 10;
-    int client_count = 20;
+    int printer_count = atoi(argv[1]);
+    int client_count = atoi(argv[2]);
 
-    key_t printer_sem_key = ftok(PRINTER_SEM_PATH, PRINTER_SEM_ID);
-    int printer_sem_id = semget(printer_sem_key, 1, 0666 | IPC_CREAT | IPC_EXCL);
-    if (printer_sem_id == -1)
+    key_t sem_key = ftok(SEM_PATH, SEM_ID);
+    int sem_id = semget(sem_key, 3, 0666 | IPC_CREAT);
+    if (sem_id == -1)
     {
-        printf("Error when creating printer semaphore: %d", errno);
+        printf("Error when creating semaphores: %d\n", errno);
         return errno;
     }
-    semctl(printer_sem_id, 0, SETVAL, printer_count);
-
-    key_t request_sem_key = ftok(REQUEST_SEM_PATH, REQUEST_SEM_ID);
-    int request_sem_id = semget(request_sem_key, 1, 0666 | IPC_CREAT | IPC_EXCL);
-    if (request_sem_id == -1)
-    {
-        printf("Error when creating request semaphore: %d", errno);
-        return errno;
-    }
-    semctl(request_sem_id, 0, SETVAL, 0);
+    semctl(sem_id, SEM_AVAILABLE_PRINTERS, SETVAL, 0);
+    semctl(sem_id, SEM_PENDING_REQUESTS, SETVAL, 0);
+    semctl(sem_id, SEM_QUEUE_SPOTS, SETVAL, PRINT_QUEUE_SIZE);
 
     key_t shared_mem_key = ftok(SHARED_MEM_PATH, SHARED_MEM_ID);
-    int shared_mem_id = shmget(shared_mem_key, SHARED_MEM_SIZE, 0666 | IPC_CREAT | IPC_EXCL);
+    int shared_mem_id = shmget(shared_mem_key, SHARED_MEM_SIZE, 0666 | IPC_CREAT);
     if (shared_mem_id == -1)
     {
-        printf("Error when creating shared memory: %d", errno);
+        printf("Error when creating shared memory: %d\n", errno);
         return errno;
     }
 
+    char *shared_buf;
+    shared_buf = shmat(shared_mem_id, NULL, 0);
+    strcpy(shared_buf, "\0");
+
+    char id_buf[16];
     for (int i = 0; i < printer_count; i++)
     {
-
+        sprintf(id_buf, "%d", i);
         if (fork() == 0)
         {
-            execl("printer", "printer", NULL);
+            execl("printer", "printer", id_buf, NULL);
         }
     }
 
     for (int i = 0; i < client_count; i++)
     {
+        sprintf(id_buf, "%d", i);
         if (fork() == 0)
         {
-            execl("client", "client", NULL);
+            execl("client", "client", id_buf, NULL);
         }
     }
 
