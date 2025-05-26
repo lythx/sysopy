@@ -7,7 +7,7 @@ all: zad1
 zad1: zad1.o
 	$(CC) zad1.o -lpthread -o zad1
 
-zad1.o: zad1.c
+zad1.o: zad1.c zad1.h
 	$(CC) $(CFLAGS) zad1.c
 
 clean:

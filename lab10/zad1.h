@@ -8,11 +8,9 @@
 #include <pthread.h>
 #include <sys/time.h>
 
-#define PATIENT_COUNT 20
 #define PATIENT_TIME_LOW 2
 #define PATIENT_TIME_HIGH 5
 
-#define PHARMACIST_COUNT 3
 #define PHARMACIST_TIME_LOW 5
 #define PHARMACIST_TIME_HIGH 15
 
@@ -23,6 +21,7 @@
 #define DELIVERY_TIME_HIGH 3
 
 #define HOSPITAL_CAPACITY 3
+#define MEDKIT_CAPACITY 6
 
 #define MAX_MESSAGE_SIZE 64
 
