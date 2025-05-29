@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
         return errno;
     }
     app_message message;
+    message.message_type = MTYPE_INIT;
     strcpy(message.client_name, name);
     if (write(socket_fd, &message, sizeof(message)) == -1)
     {
