@@ -1,7 +1,10 @@
 #include "defs.h"
 
+int client_count = 0;
+app_client clients[MAX_CLIENTS] = {0};
+
 void accept_process(int socket_fd);
-void receive_process(int socket_fd);
+void receive_process(app_client *client);
 
 int main(int argc, char *argv[])
 {
@@ -43,31 +46,61 @@ int main(int argc, char *argv[])
         return errno;
     }
 
-    if (fork() == 0)
-    {
-        accept_process(socket_fd);
-    }
-    else
-    {
-        receive_process(socket_fd);
-    }
+    accept_process(socket_fd);
 
     return 0;
 }
 
 void accept_process(int socket_fd)
 {
+    struct sockaddr_in addr_struct;
+    socklen_t addr_struct_length = sizeof(addr_struct);
     while (1)
     {
-        accept(socket_fd, NULL, NULL);
+        int client_socket_fd = accept(socket_fd, (struct sockaddr *)&addr_struct, &addr_struct_length);
+        if (client_socket_fd == -1)
+        {
+            printf("Error on accept(): %d\n", errno);
+            continue;
+        }
+
+        app_client client;
+        client.address = addr_struct.sin_addr.s_addr;
+        client.port = addr_struct.sin_port;
+        client.socket_fd = client_socket_fd;
+        clients[client_count] = client;
+        if (fork() == 0)
+        {
+            receive_process(&client);
+        }
+        client_count++;
     }
 }
 
-void receive_process(int socket_fd)
+void receive_process(app_client *client)
 {
-
+    app_message message;
     while (1)
     {
-        // read(socket_fd,);
+        ssize_t bytes_read = recv(client->socket_fd, &message, sizeof(message), MSG_WAITALL);
+        if (bytes_read == -1)
+        {
+            printf("Error on recv(): %d\n", errno);
+            continue;
+        }
+        else if (bytes_read == 0)
+        {
+            continue;
+        }
+        switch (message.message_type)
+        {
+        case MTYPE_INIT:
+
+            break;
+
+        default:
+            break;
+        }
+        printf("RECEIVE SUCCESS %s", message.client_name);
     }
 }

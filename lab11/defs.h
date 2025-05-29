@@ -3,33 +3,32 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/msg.h>
-#include <sys/ipc.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#define SERVER_PATH getenv("HOME")
-#define SERVER_ID 1
-#define MAX_MESSAGE_TEXT 256
 #define MAX_CLIENTS 32
+#define MAX_CLIENT_NAME_LENGTH 128
 
 typedef enum
 {
-  MTYPE_INIT = 1,
-  MTYPE_REGISTERED = 2,
-  MTYPE_CLIENT_MESSAGE = 3,
-  MTYPE_SERVER_MESSAGE = 4,
-  MTYPE_NEW_CLIENT = 5,
-  MTYPE_LIST = 6
-} message_type;
+    OP_LIST = 0,
+    OP_TO_ALL = 1,
+    OP_TO_ONE = 2,
+    OP_STOP = 3,
+    OP_ALIVE = 4
+} app_message_type;
 
 typedef struct
 {
-  long mtype;
-  int client_id;
-  key_t client_queue_key;
-  char text[MAX_MESSAGE_TEXT];
-} message_t;
+    char client_name[MAX_CLIENT_NAME_LENGTH];
+    app_message_type message_type;
+} app_message;
 
-#define MESSAGE_SIZE (sizeof(message_t) - sizeof(long))
+typedef struct
+{
+    uint32_t address;
+    in_port_t port;
+    int socket_fd;
+    char client_name[MAX_CLIENT_NAME_LENGTH];
+} app_client;
