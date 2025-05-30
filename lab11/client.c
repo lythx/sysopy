@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
     {
         pthread_cond_wait(&stop_cond, &stop_mutex);
     }
+    handle_stop_command(&client);
     pthread_mutex_unlock(&stop_mutex);
 
     pthread_cancel(message_handler_thread_id);
@@ -136,7 +137,6 @@ void *input_handler_thread(void *arg)
         scanf("%s", command);
         if (strcmp(command, "STOP") == 0)
         {
-            handle_stop_command(client);
             broadcast_stop();
             break;
         }
