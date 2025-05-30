@@ -21,7 +21,6 @@ int stop = 0;
 
 void sigint_handler(int sig)
 {
-    printf("STOP SIGNAL");
     broadcast_stop();
 }
 
