@@ -19,8 +19,6 @@ pthread_mutex_t stop_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t stop_cond = PTHREAD_COND_INITIALIZER;
 int stop = 0;
 
-int client_socket_fd;
-
 void sigint_handler(int sig)
 {
     broadcast_stop();
@@ -52,49 +50,47 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    client_socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (client_socket_fd == -1)
+    int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (socket_fd == -1)
     {
         printf("Error on socket(): %d\n", errno);
         return errno;
     }
 
-    struct sockaddr_in server_addr_struct;
-    server_addr_struct.sin_family = AF_INET;
-    server_addr_struct.sin_port = htons(port);
-    server_addr_struct.sin_addr = in_addr_val;
-    socklen_t server_addr_length = sizeof(server_addr_struct);
-
-    if (connect(client_socket_fd, (struct sockaddr *)&server_addr_struct, server_addr_length) == -1)
+    struct sockaddr_in addr_struct;
+    addr_struct.sin_family = AF_INET;
+    addr_struct.sin_port = htons(port);
+    addr_struct.sin_addr = in_addr_val;
+    socklen_t addr_struct_length = sizeof(addr_struct);
+    if (connect(socket_fd, (struct sockaddr *)&addr_struct, addr_struct_length) == -1)
     {
         printf("Error on connect(): %d\n", errno);
         return errno;
     }
 
     app_client client;
-    client.addr = server_addr_struct;
-    client.addr_len = server_addr_length;
     strcpy(client.name, name);
+    client.socket_fd = socket_fd;
 
     pthread_t message_handler_thread_id;
     if (pthread_create(&message_handler_thread_id, NULL, message_handler_thread, (void *)&client) != 0)
     {
-        printf("Error on pthread_create(message_handler_thread): %d", errno);
+        printf("Error on pthread_create(request_handler_thread): %d", errno);
     }
 
     app_message message;
     message.type = MTYPE_INIT;
     strcpy(message.sender, name);
-    if (send(client_socket_fd, &message, sizeof(app_message), 0) == -1)
+    if (write(socket_fd, &message, sizeof(app_message)) == -1)
     {
-        printf("Error on initial send(): %d\n", errno);
+        printf("Error on write(): %d\n", errno);
         return errno;
     }
 
     pthread_t input_handler_thread_id;
     if (pthread_create(&input_handler_thread_id, NULL, input_handler_thread, (void *)&client) != 0)
     {
-        printf("Error on pthread_create(input_handler_thread): %d", errno);
+        printf("Error on pthread_create(request_handler_thread): %d", errno);
     }
 
     pthread_mutex_lock(&stop_mutex);
@@ -107,7 +103,7 @@ int main(int argc, char *argv[])
 
     pthread_cancel(message_handler_thread_id);
     pthread_cancel(input_handler_thread_id);
-    close(client_socket_fd);
+
     return 0;
 }
 
@@ -117,7 +113,7 @@ void *message_handler_thread(void *arg)
     app_message response;
     while (1)
     {
-        ssize_t bytes_read = recv(client_socket_fd, &response, sizeof(app_message), 0);
+        ssize_t bytes_read = recv(client->socket_fd, &response, sizeof(app_message), MSG_WAITALL);
         if (bytes_read == -1)
         {
             printf("Error on recv(): %d\n", errno);
@@ -132,9 +128,8 @@ void *message_handler_thread(void *arg)
 
 void *input_handler_thread(void *arg)
 {
-    char command[8];
     app_client *client = (app_client *)arg;
-
+    char command[8];
     while (1)
     {
         scanf("%s", command);
@@ -183,7 +178,7 @@ void handle_message(app_message *message, app_client *client)
     case MTYPE_ALIVE:
         app_message alive_message;
         alive_message.type = MTYPE_ALIVE;
-        if (send(client_socket_fd, &alive_message, sizeof(app_message), 0) == -1)
+        if (write(client->socket_fd, &alive_message, sizeof(app_message)) == -1)
         {
             printf("Error when handling ALIVE message: %d\n", errno);
         }
@@ -195,20 +190,15 @@ void handle_message(app_message *message, app_client *client)
     pthread_mutex_unlock(&stdout_mutex);
 }
 
-void send_message(app_client *client, app_message *message)
-{
-    if (send(client_socket_fd, message, sizeof(app_message), 0) == -1)
-    {
-        printf("Error on send_message(): %d\n", errno);
-    }
-}
-
 void handle_list_command(app_client *client)
 {
     app_message message;
     message.type = MTYPE_LIST;
     strcpy(message.sender, client->name);
-    send_message(client, &message);
+    if (write(client->socket_fd, &message, sizeof(app_message)) == -1)
+    {
+        printf("Error on handle_list_command(): %d\n", errno);
+    }
 }
 
 void handle_2all_command(app_client *client)
@@ -222,7 +212,10 @@ void handle_2all_command(app_client *client)
     printf("Tekst wiadomości: ");
     scanf("%s", message.text);
 
-    send_message(client, &message);
+    if (write(client->socket_fd, &message, sizeof(app_message)) == -1)
+    {
+        printf("Error on handle_2all_command(): %d\n", errno);
+    }
 
     pthread_mutex_unlock(&stdout_mutex);
 }
@@ -241,7 +234,10 @@ void handle_2one_command(app_client *client)
     printf("Tekst wiadomości: ");
     scanf("%s", message.text);
 
-    send_message(client, &message);
+    if (write(client->socket_fd, &message, sizeof(app_message)) == -1)
+    {
+        printf("Error on handle_2one_command(): %d\n", errno);
+    }
 
     pthread_mutex_unlock(&stdout_mutex);
 }
@@ -252,7 +248,10 @@ void handle_stop_command(app_client *client)
     message.type = MTYPE_STOP;
     strcpy(message.sender, client->name);
 
-    send_message(client, &message);
+    if (write(client->socket_fd, &message, sizeof(app_message)) == -1)
+    {
+        printf("Error on handle_stop_command(): %d\n", errno);
+    }
 }
 
 void broadcast_stop()

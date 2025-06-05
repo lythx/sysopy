@@ -40,4 +40,5 @@ typedef struct
     int alive_confirmed;
     int deleted;
     int initialized;
+    int socket_fd;
 } app_client;
